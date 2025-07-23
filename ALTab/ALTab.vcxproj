@@ -126,31 +126,41 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\AimTrainer.cpp" />
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\BasicScene.cpp" />
     <ClCompile Include="src\Camera.cpp" />
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\Options.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\SkyDome.cpp" />
-    <ClCompile Include="src\Terrain.cpp" />
+    <ClCompile Include="src\Platform.cpp" />
+    <ClCompile Include="src\Wall.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\AimTrainer.hpp" />
     <ClInclude Include="src\Application.hpp" />
     <ClInclude Include="src\BasicScene.hpp" />
     <ClInclude Include="src\Camera.hpp" />
+    <ClInclude Include="src\Options.hpp" />
     <ClInclude Include="src\Scene.hpp" />
     <ClInclude Include="src\Shader.hpp" />
     <ClInclude Include="src\SkyDome.hpp" />
-    <ClInclude Include="src\Terrain.hpp" />
+    <ClInclude Include="src\Platform.hpp" />
     <ClInclude Include="src\utils\stb_image.h" />
+    <ClInclude Include="src\Wall.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\skydome.hdr" />
+    <None Include="shaders\sharpen.frag" />
+    <None Include="shaders\sharpen.vert" />
     <None Include="shaders\crosshair.frag" />
     <None Include="shaders\crosshair.vert" />
     <None Include="shaders\basic.frag" />
     <None Include="shaders\basic.vert" />
+    <None Include="shaders\platform.frag" />
+    <None Include="shaders\platform.vert" />
     <None Include="shaders\skydome.frag" />
     <None Include="shaders\skydome.vert" />
   </ItemGroup>

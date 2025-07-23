@@ -9,6 +9,8 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <chrono>  // for frame timing
+
 #include "Scene.hpp"
 #include "BasicScene.hpp"
 #include "Shader.hpp"
@@ -45,6 +47,12 @@ private:
 	// crosshair
 	Shader* crosshairShader;
 	unsigned int crossVAO, crossVBO;
+
+	// frame timing and FPS cap
+	double lastTime;
+	int frameCount;
+	int fpsCapOption;  // 0=60,1=144,2=240,3=360,4=unlimited
+	std::chrono::steady_clock::duration invFrameTime; // target frame duration
 };
 
 #endif // APPLICATION_HPP

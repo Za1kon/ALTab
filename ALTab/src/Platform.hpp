@@ -1,12 +1,13 @@
+// ===== Platform.hpp =====
 #pragma once
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <vector>
 
-class Terrain {
+class Platform {
 public:
-	Terrain(float size = 10.0f, int resolution = 100);
-	~Terrain();
+	Platform(float size = 10.0f, int resolution = 100);
+	~Platform();
 
 	void Draw() const;
 

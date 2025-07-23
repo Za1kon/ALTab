@@ -3,6 +3,8 @@
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 Application::Application(int w, int h, const std::string& title)
 	: width(w), height(h), title(title),
@@ -55,6 +57,16 @@ void Application::InitWindow(int w, int h, const std::string& title) {
 		if (key == GLFW_KEY_ESCAPE && act == GLFW_PRESS)
 			glfwSetWindowShouldClose(w, GLFW_TRUE);
 		});
+	lastTime = glfwGetTime();
+	fpsCapOption = 2;  // Cambiá este valor de 1 a 5 para elegir FPS
+	switch (fpsCapOption) {
+	case 1: invFrameTime = std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(1.0 / 60.0));  break;
+	case 2: invFrameTime = std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(1.0 / 144.0)); break;
+	case 3: invFrameTime = std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(1.0 / 240.0)); break;
+	case 4: invFrameTime = std::chrono::duration_cast<std::chrono::steady_clock::duration>(std::chrono::duration<double>(1.0 / 360.0)); break;
+	case 5: invFrameTime = std::chrono::steady_clock::duration::zero(); break; // unlimited
+	}
+	frameCount = 0;
 }
 
 void Application::InitScene() {
@@ -84,12 +96,36 @@ void Application::InitCrosshair() {
 }
 
 int Application::Run() {
+	using clock = std::chrono::steady_clock;
+	auto nextFrame = clock::now();
+
 	while (!glfwWindowShouldClose(window)) {
+		auto frameStart = clock::now();
+
 		ProcessInput();
 		Update();
 		Render();
+
 		glfwSwapBuffers(window);
 		glfwPollEvents();
+
+		if (fpsCapOption != 4 && invFrameTime.count() > 0) {
+			nextFrame += invFrameTime;
+			auto almost = nextFrame - std::chrono::microseconds(1000);
+			std::this_thread::sleep_until(almost);
+			while (clock::now() < nextFrame) {}
+		}
+		else {
+			nextFrame = clock::now();
+		}
+
+		frameCount++;
+		double currentTime = glfwGetTime();
+		if (currentTime - lastTime >= 1.0) {
+			std::cout << "FPS: " << frameCount << std::endl;
+			frameCount = 0;
+			lastTime = currentTime;
+		}
 	}
 	return 0;
 }
@@ -113,7 +149,6 @@ void Application::Render() {
 	sky->Draw(projection, view);
 	glDepthMask(GL_TRUE);
 
-	// Aquí cambiamos la llamada a Render con dos argumentos
 	scene->Render(projection, view);
 
 	glDisable(GL_DEPTH_TEST);

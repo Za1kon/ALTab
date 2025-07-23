@@ -1,16 +1,17 @@
-#include "Terrain.hpp"
+// ===== Platform.cpp =====
+#include "Platform.hpp"
 
-Terrain::Terrain(float size, int res) : vao(0), vbo(0), ebo(0), indexCount(0) {
+Platform::Platform(float size, int res) : vao(0), vbo(0), ebo(0), indexCount(0) {
 	GenerateMesh(size, res);
 }
 
-Terrain::~Terrain() {
+Platform::~Platform() {
 	glDeleteVertexArrays(1, &vao);
 	glDeleteBuffers(1, &vbo);
 	glDeleteBuffers(1, &ebo);
 }
 
-void Terrain::GenerateMesh(float size, int res) {
+void Platform::GenerateMesh(float size, int res) {
 	std::vector<glm::vec3> vertices;
 	std::vector<GLuint> indices;
 
@@ -57,7 +58,7 @@ void Terrain::GenerateMesh(float size, int res) {
 	glBindVertexArray(0);
 }
 
-void Terrain::Draw() const {
+void Platform::Draw() const {
 	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
 	glBindVertexArray(0);
