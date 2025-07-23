@@ -10,17 +10,25 @@ Application::Application(int w, int h, const std::string& title)
 	: width(w), height(h), title(title),
 	window(nullptr), camera(nullptr), scene(nullptr), sky(nullptr),
 	yaw(-90.0f), pitch(0.0f), lastX(0.0f), lastY(0.0f), firstMouse(true),
-	crosshairShader(nullptr), crossVAO(0), crossVBO(0)
+	crosshairShader(nullptr), crossVAO(0), crossVBO(0),
+	postShader(nullptr), postVAO(0), postVBO(0),
+	sharpenFBO(0), sharpenTexture(0), sharpenRBO(0),
+	msaaFBO(0), msaaColorRBO(0), msaaDepthRBO(0),
+	sharpness(0.5f)
 {
 	InitWindow(width, height, title);
 	InitScene();
 	InitCrosshair();
+	InitPostProcessing();
 }
 
 Application::~Application() {
 	delete crosshairShader;
+	delete postShader;
 	glDeleteVertexArrays(1, &crossVAO);
 	glDeleteBuffers(1, &crossVBO);
+	glDeleteVertexArrays(1, &postVAO);
+	glDeleteBuffers(1, &postVBO);
 	delete scene;
 	delete camera;
 	delete sky;
@@ -77,6 +85,50 @@ void Application::InitScene() {
 	scene->Init();
 
 	sky = new SkyDome("assets/skydome.hdr", 100.0f);
+
+	// === Crear framebuffer multisample ===
+	glGenFramebuffers(1, &msaaFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, msaaFBO);
+
+	// Color renderbuffer multisample
+	glGenRenderbuffers(1, &msaaColorRBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, msaaColorRBO);
+	glRenderbufferStorageMultisample(GL_RENDERBUFFER, 8, GL_RGB8, width, height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, msaaColorRBO);
+
+	// Depth-stencil renderbuffer multisample
+	glGenRenderbuffers(1, &msaaDepthRBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, msaaDepthRBO);
+	glRenderbufferStorageMultisample(GL_RENDERBUFFER, 8, GL_DEPTH24_STENCIL8, width, height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, msaaDepthRBO);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		std::cerr << "ERROR: MSAA framebuffer incomplete\n";
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// === Crear framebuffer para post-procesado (sharpen) ===
+	glGenFramebuffers(1, &sharpenFBO);
+	glBindFramebuffer(GL_FRAMEBUFFER, sharpenFBO);
+
+	// Textura color single-sample
+	glGenTextures(1, &sharpenTexture);
+	glBindTexture(GL_TEXTURE_2D, sharpenTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, sharpenTexture, 0);
+
+	// Depth-stencil renderbuffer single-sample
+	glGenRenderbuffers(1, &sharpenRBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, sharpenRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, sharpenRBO);
+
+	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		std::cerr << "ERROR: Sharpen framebuffer incomplete\n";
+	}
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void Application::InitCrosshair() {
@@ -92,6 +144,30 @@ void Application::InitCrosshair() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+	glBindVertexArray(0);
+}
+
+void Application::InitPostProcessing() {
+	postShader = new Shader("shaders/sharpen.vert", "shaders/sharpen.frag");
+	float quadVertices[] = {
+		// positions   // texCoords
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		-1.0f, -1.0f,  0.0f, 0.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+
+		-1.0f,  1.0f,  0.0f, 1.0f,
+		 1.0f, -1.0f,  1.0f, 0.0f,
+		 1.0f,  1.0f,  1.0f, 1.0f
+	};
+	glGenVertexArrays(1, &postVAO);
+	glGenBuffers(1, &postVBO);
+	glBindVertexArray(postVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, postVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), quadVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)(2 * sizeof(float)));
 	glBindVertexArray(0);
 }
 
@@ -131,7 +207,11 @@ int Application::Run() {
 }
 
 void Application::ProcessInput() {
-	// (none for now)
+	// Control dinámico de nitidez
+	bool increase = glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS;
+	bool decrease = glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS;
+	if (increase) sharpness = glm::min(sharpness + 0.1f, 1.0f);
+	if (decrease) sharpness = glm::max(sharpness - 0.1f, 0.0f);
 }
 
 void Application::Update() {
@@ -140,17 +220,39 @@ void Application::Update() {
 }
 
 void Application::Render() {
+	// 1) Render a MSAA framebuffer
+	glBindFramebuffer(GL_FRAMEBUFFER, msaaFBO);
+	glViewport(0, 0, width, height);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glm::mat4 projection = camera->GetProjection();
 	glm::mat4 view = camera->GetView();
-
 	glDepthMask(GL_FALSE);
 	sky->Draw(projection, view);
 	glDepthMask(GL_TRUE);
-
 	scene->Render(projection, view);
 
+	// 2) Resolve MSAA to single-sample FBO
+	glBindFramebuffer(GL_READ_FRAMEBUFFER, msaaFBO);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, sharpenFBO);
+	glBlitFramebuffer(0, 0, width, height,
+		0, 0, width, height,
+		GL_COLOR_BUFFER_BIT, GL_NEAREST);
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	// 3) Post-procesado: dibujar quad con textura resultante
+	glClear(GL_COLOR_BUFFER_BIT);
+	postShader->Use();
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, sharpenTexture);
+	postShader->SetUniform("screenTexture", 0);
+	postShader->SetUniform("sharpness", sharpness);
+	glDisable(GL_DEPTH_TEST);
+	glBindVertexArray(postVAO);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glEnable(GL_DEPTH_TEST);
+
+	// 4) Crosshair
 	glDisable(GL_DEPTH_TEST);
 	crosshairShader->Use();
 	glm::mat4 ortho = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f);
