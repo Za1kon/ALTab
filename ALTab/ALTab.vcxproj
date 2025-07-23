@@ -132,6 +132,7 @@
     <ClCompile Include="src\glad.c" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\SkyDome.cpp" />
     <ClCompile Include="src\Terrain.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -140,13 +141,18 @@
     <ClInclude Include="src\Camera.hpp" />
     <ClInclude Include="src\Scene.hpp" />
     <ClInclude Include="src\Shader.hpp" />
+    <ClInclude Include="src\SkyDome.hpp" />
     <ClInclude Include="src\Terrain.hpp" />
+    <ClInclude Include="src\utils\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="assets\skydome.hdr" />
     <None Include="shaders\crosshair.frag" />
     <None Include="shaders\crosshair.vert" />
     <None Include="shaders\basic.frag" />
     <None Include="shaders\basic.vert" />
+    <None Include="shaders\skydome.frag" />
+    <None Include="shaders\skydome.vert" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

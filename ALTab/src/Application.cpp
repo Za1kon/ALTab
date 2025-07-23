@@ -1,12 +1,12 @@
+// ===== Application.cpp =====
 #include "Application.hpp"
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
-// Constructor
 Application::Application(int w, int h, const std::string& title)
 	: width(w), height(h), title(title),
-	window(nullptr), camera(nullptr), scene(nullptr),
+	window(nullptr), camera(nullptr), scene(nullptr), sky(nullptr),
 	yaw(-90.0f), pitch(0.0f), lastX(0.0f), lastY(0.0f), firstMouse(true),
 	crosshairShader(nullptr), crossVAO(0), crossVBO(0)
 {
@@ -15,22 +15,22 @@ Application::Application(int w, int h, const std::string& title)
 	InitCrosshair();
 }
 
-// Destructor
 Application::~Application() {
 	delete crosshairShader;
 	glDeleteVertexArrays(1, &crossVAO);
 	glDeleteBuffers(1, &crossVBO);
 	delete scene;
 	delete camera;
+	delete sky;
 	if (window) {
 		glfwDestroyWindow(window);
 		glfwTerminate();
 	}
 }
 
-// GLFW + GLAD setup
 void Application::InitWindow(int w, int h, const std::string& title) {
 	glfwInit();
+	glfwWindowHint(GLFW_SAMPLES, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
@@ -45,6 +45,7 @@ void Application::InitWindow(int w, int h, const std::string& title) {
 	}
 	glViewport(0, 0, width, height);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_MULTISAMPLE);
 
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glfwSetCursorPosCallback(window, [](GLFWwindow* win, double x, double y) {
@@ -56,24 +57,22 @@ void Application::InitWindow(int w, int h, const std::string& title) {
 		});
 }
 
-// Scene setup
 void Application::InitScene() {
-	// Camera above origin looking down slightly
 	float aspect = static_cast<float>(width) / static_cast<float>(height);
-	camera = new Camera({ 0,3,3 }, { 0,0,0 }, { 0,1,0 }, 45.0f, aspect, 0.1f, 100.0f);
+	camera = new Camera({ 0,1,0 }, { 0,0,0 }, { 0,1,0 }, 45.0f, aspect, 0.1f, 100.0f);
 
-	// Basic terrain scene
-	scene = new BasicScene(10.0f, 100);
+	scene = new BasicScene(2.0f, 20);
 	scene->Init();
+
+	sky = new SkyDome("assets/skydome.hdr", 100.0f);
 }
 
-// Crosshair VAO/VBO + shader
 void Application::InitCrosshair() {
 	crosshairShader = new Shader("shaders/crosshair.vert", "shaders/crosshair.frag");
 	float s = 5.0f;
 	float hx = s / float(width) * 2.0f;
 	float hy = s / float(height) * 2.0f;
-	float verts[] = { -hx,0,  hx,0,  0,-hy,  0,hy };
+	float verts[] = { -hx, 0, hx, 0, 0, -hy, 0, hy };
 	glGenVertexArrays(1, &crossVAO);
 	glGenBuffers(1, &crossVBO);
 	glBindVertexArray(crossVAO);
@@ -107,10 +106,16 @@ void Application::Update() {
 void Application::Render() {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	glm::mat4 vp = camera->GetProjection() * camera->GetView();
-	scene->Render(vp);
+	glm::mat4 projection = camera->GetProjection();
+	glm::mat4 view = camera->GetView();
 
-	// Draw crosshair
+	glDepthMask(GL_FALSE);
+	sky->Draw(projection, view);
+	glDepthMask(GL_TRUE);
+
+	// Aquí cambiamos la llamada a Render con dos argumentos
+	scene->Render(projection, view);
+
 	glDisable(GL_DEPTH_TEST);
 	crosshairShader->Use();
 	glm::mat4 ortho = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f);

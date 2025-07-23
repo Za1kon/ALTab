@@ -1,4 +1,4 @@
-// Shader.cpp
+// ===== Shader.cpp =====
 #include "Shader.hpp"
 #include <glad/glad.h>
 #include <iostream>
@@ -26,6 +26,7 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath, b
 	glAttachShader(ID, fs);
 	glLinkProgram(ID);
 
+
 	int success;
 	glGetProgramiv(ID, GL_LINK_STATUS, &success);
 	if (!success) {
@@ -33,7 +34,7 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath, b
 		glGetProgramiv(ID, GL_INFO_LOG_LENGTH, &len);
 		std::vector<char> log(len);
 		glGetProgramInfoLog(ID, len, &len, log.data());
-		std::cerr << "Shader link error:\n" << log.data() << "\n";
+		std::cerr << "Program link error:\n" << log.data() << "\n";
 	}
 
 	glDeleteShader(vs);
@@ -42,25 +43,6 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath, b
 
 Shader::~Shader() {
 	glDeleteProgram(ID);
-}
-
-unsigned int Shader::compileShader(unsigned int type, const std::string& src) {
-	unsigned int sh = glCreateShader(type);
-	const char* s = src.c_str();
-	glShaderSource(sh, 1, &s, nullptr);
-	glCompileShader(sh);
-
-	int success;
-	glGetShaderiv(sh, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		int len;
-		glGetShaderiv(sh, GL_INFO_LOG_LENGTH, &len);
-		std::vector<char> log(len);
-		glGetShaderInfoLog(sh, len, &len, log.data());
-		std::cerr << (type == GL_VERTEX_SHADER ? "Vertex" : "Fragment")
-			<< " shader compile error:\n" << log.data() << "\n";
-	}
-	return sh;
 }
 
 void Shader::Use() const {
@@ -79,6 +61,31 @@ void Shader::SetUniform(const std::string& name, const glm::mat4& mat) const {
 void Shader::SetUniform(const std::string& name, float v) const {
 	int loc = getUniformLocation(name);
 	glUniform1f(loc, v);
+}
+
+void Shader::SetUniform(const std::string& name, int v) const {
+	int loc = getUniformLocation(name);
+	glUniform1i(loc, v);
+}
+
+unsigned int Shader::compileShader(unsigned int type, const std::string& src) {
+	unsigned int sh = glCreateShader(type);
+	const char* s = src.c_str();
+	glShaderSource(sh, 1, &s, nullptr);
+	glCompileShader(sh);
+
+	int success;
+	glGetShaderiv(sh, GL_COMPILE_STATUS, &success);
+	if (!success) {
+		int len;
+		glGetShaderiv(sh, GL_INFO_LOG_LENGTH, &len);
+		std::vector<char> log(len);
+		glGetShaderInfoLog(sh, len, &len, log.data());
+		std::cerr << "Shader compile error ("
+			<< (type == GL_VERTEX_SHADER ? "VERTEX" : "FRAGMENT")
+			<< "):\n" << log.data() << "\n";
+	}
+	return sh;
 }
 
 std::string Shader::LoadFromFile(const std::string& path) {

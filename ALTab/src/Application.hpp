@@ -1,3 +1,4 @@
+// ===== Application.hpp =====
 #ifndef APPLICATION_HPP
 #define APPLICATION_HPP
 
@@ -10,8 +11,9 @@
 
 #include "Scene.hpp"
 #include "BasicScene.hpp"
-#include "Shader.hpp"  // for crosshair
-#include "Camera.hpp" 
+#include "Shader.hpp"
+#include "Camera.hpp"
+#include "SkyDome.hpp"
 
 class Application {
 public:
@@ -32,12 +34,13 @@ private:
 	std::string title;
 	GLFWwindow* window;
 
-	Camera* camera;       // camera stays
-	Scene* scene;        // now only this scene
+	Camera* camera;
+	Scene* scene;
+	SkyDome* sky;
 
 	// mouse control
 	float yaw, pitch, lastX, lastY;
-	bool  firstMouse;
+	bool firstMouse;
 
 	// crosshair
 	Shader* crosshairShader;

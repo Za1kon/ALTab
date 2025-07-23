@@ -1,4 +1,3 @@
-// Shader.hpp
 #ifndef SHADER_HPP
 #define SHADER_HPP
 
@@ -13,6 +12,7 @@ public:
 	void Use() const;
 	void SetUniform(const std::string& name, const glm::mat4& mat) const;
 	void SetUniform(const std::string& name, float v) const;
+	void SetUniform(const std::string& name, int v) const;  // nuevo overload para samplers
 
 private:
 	unsigned int ID;
