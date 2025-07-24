@@ -3,6 +3,7 @@
 
 #include <string>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>  // for glm::value_ptr
 
 class Shader {
 public:
@@ -10,9 +11,13 @@ public:
 	~Shader();
 
 	void Use() const;
-	void SetUniform(const std::string& name, const glm::mat4& mat) const;
+
+	// Uniform overloads
 	void SetUniform(const std::string& name, float v) const;
-	void SetUniform(const std::string& name, int v) const;  // nuevo overload para samplers
+	void SetUniform(const std::string& name, int v)   const;  // for sampler uniforms
+	void SetUniform(const std::string & name, const glm::vec2 & v) const;
+	void SetUniform(const std::string& name, const glm::vec3& v) const;
+	void SetUniform(const std::string& name, const glm::mat4& m) const;
 
 private:
 	unsigned int ID;

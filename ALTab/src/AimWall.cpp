@@ -1,4 +1,4 @@
-#include "AimTrainer.hpp"
+#include "AimWall.hpp"
 
 AimTrainer::AimTrainer() : wall(nullptr) {}
 

@@ -1,25 +1,33 @@
 // ===== BasicScene.hpp =====
 #pragma once
 #include "Scene.hpp"
-#include "Platform.hpp"
 #include "Shader.hpp"
+#include "Platform.hpp"
 #include "Wall.hpp"
 #include <glm/glm.hpp>
 
 class BasicScene : public Scene {
 public:
-	BasicScene(float size = 10.0f, int resolution = 100);
+	BasicScene(float terrainSize, int terrainRes);
 	~BasicScene();
 
 	void Init() override;
-	void Update(float deltaTime) override;
+	void Update(float delta) override;
 	void Render(const glm::mat4& projection, const glm::mat4& view) override;
 
 private:
+	// Parámetros de terreno (usados para la plataforma)
+	float terrainSize;
+	int terrainRes;
+
+	// Plataforma estilizada
+	Shader* platformShader;
 	Platform* platform;
-	Shader* shader;
+
+	// Paredes frontales y traseras
 	Wall* aimWall;
 	Wall* optionsWall;
-	float    size;
-	int      resolution;
+
+	BasicScene(const BasicScene&) = delete;
+	BasicScene& operator=(const BasicScene&) = delete;
 };

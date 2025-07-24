@@ -42,7 +42,7 @@
     <ClCompile Include="src\Wall.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="src\AimTrainer.cpp">
+    <ClCompile Include="src\AimWall.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
     <ClCompile Include="src\Options.cpp">
@@ -77,7 +77,7 @@
     <ClInclude Include="src\Wall.hpp">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="src\AimTrainer.hpp">
+    <ClInclude Include="src\AimWall.hpp">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
     <ClInclude Include="src\Options.hpp">
@@ -91,10 +91,10 @@
     <None Include="shaders\crosshair.vert">
       <Filter>Archivos de recursos</Filter>
     </None>
-    <None Include="shaders\basic.frag">
+    <None Include="shaders\wall.frag">
       <Filter>Archivos de recursos</Filter>
     </None>
-    <None Include="shaders\basic.vert">
+    <None Include="shaders\wall.vert">
       <Filter>Archivos de recursos</Filter>
     </None>
     <None Include="assets\skydome.hdr">

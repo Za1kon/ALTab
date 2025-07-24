@@ -126,7 +126,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\AimTrainer.cpp" />
+    <ClCompile Include="src\AimWall.cpp" />
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\BasicScene.cpp" />
     <ClCompile Include="src\Camera.cpp" />
@@ -139,7 +139,7 @@
     <ClCompile Include="src\Wall.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\AimTrainer.hpp" />
+    <ClInclude Include="src\AimWall.hpp" />
     <ClInclude Include="src\Application.hpp" />
     <ClInclude Include="src\BasicScene.hpp" />
     <ClInclude Include="src\Camera.hpp" />
@@ -157,8 +157,8 @@
     <None Include="shaders\sharpen.vert" />
     <None Include="shaders\crosshair.frag" />
     <None Include="shaders\crosshair.vert" />
-    <None Include="shaders\basic.frag" />
-    <None Include="shaders\basic.vert" />
+    <None Include="shaders\wall.frag" />
+    <None Include="shaders\wall.vert" />
     <None Include="shaders\platform.frag" />
     <None Include="shaders\platform.vert" />
     <None Include="shaders\skydome.frag" />

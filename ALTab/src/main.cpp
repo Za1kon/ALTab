@@ -7,6 +7,6 @@ int main() {
 	int w = mode->width, h = mode->height;
 	glfwTerminate();
 
-	Application app(w, h, "AimTrainer");
+	Application app(w, h, "ALTab");
 	return app.Run();
 }

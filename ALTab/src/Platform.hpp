@@ -12,6 +12,11 @@ public:
 	void Draw() const;
 
 private:
+	struct Vertex {
+		glm::vec3 position;
+		glm::vec2 uv;
+	};
+
 	GLuint vao, vbo, ebo;
 	GLsizei indexCount;
 

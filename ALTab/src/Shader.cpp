@@ -7,16 +7,8 @@
 #include <vector>
 
 Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath, bool fromFile) {
-	std::string vertSrc, fragSrc;
-
-	if (fromFile) {
-		vertSrc = LoadFromFile(vertexPath);
-		fragSrc = LoadFromFile(fragmentPath);
-	}
-	else {
-		vertSrc = vertexPath;
-		fragSrc = fragmentPath;
-	}
+	std::string vertSrc = fromFile ? LoadFromFile(vertexPath) : vertexPath;
+	std::string fragSrc = fromFile ? LoadFromFile(fragmentPath) : fragmentPath;
 
 	unsigned int vs = compileShader(GL_VERTEX_SHADER, vertSrc);
 	unsigned int fs = compileShader(GL_FRAGMENT_SHADER, fragSrc);
@@ -25,7 +17,6 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath, b
 	glAttachShader(ID, vs);
 	glAttachShader(ID, fs);
 	glLinkProgram(ID);
-
 
 	int success;
 	glGetProgramiv(ID, GL_LINK_STATUS, &success);
@@ -53,19 +44,29 @@ int Shader::getUniformLocation(const std::string& name) const {
 	return glGetUniformLocation(ID, name.c_str());
 }
 
-void Shader::SetUniform(const std::string& name, const glm::mat4& mat) const {
-	int loc = getUniformLocation(name);
-	glUniformMatrix4fv(loc, 1, GL_FALSE, &mat[0][0]);
-}
-
 void Shader::SetUniform(const std::string& name, float v) const {
 	int loc = getUniformLocation(name);
-	glUniform1f(loc, v);
+	if (loc != -1) glUniform1f(loc, v);
 }
 
 void Shader::SetUniform(const std::string& name, int v) const {
 	int loc = getUniformLocation(name);
-	glUniform1i(loc, v);
+	if (loc != -1) glUniform1i(loc, v);
+}
+
+void Shader::SetUniform(const std::string & name, const glm::vec2 & v) const {
+	int loc = getUniformLocation(name);
+	if (loc != -1) glUniform2fv(loc, 1, glm::value_ptr(v));
+}
+
+void Shader::SetUniform(const std::string& name, const glm::vec3& v) const {
+	int loc = getUniformLocation(name);
+	if (loc != -1) glUniform3fv(loc, 1, glm::value_ptr(v));
+}
+
+void Shader::SetUniform(const std::string& name, const glm::mat4& m) const {
+	int loc = getUniformLocation(name);
+	if (loc != -1) glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(m));
 }
 
 unsigned int Shader::compileShader(unsigned int type, const std::string& src) {
@@ -94,7 +95,7 @@ std::string Shader::LoadFromFile(const std::string& path) {
 		std::cerr << "Error loading shader file: " << path << "\n";
 		return "";
 	}
-
+	std::cout << "Loaded shader: " << path << "\n";  // <- agregá esto
 	std::stringstream buffer;
 	buffer << file.rdbuf();
 	return buffer.str();

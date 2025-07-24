@@ -12,18 +12,17 @@ Platform::~Platform() {
 }
 
 void Platform::GenerateMesh(float size, int res) {
-	std::vector<glm::vec3> vertices;
+	std::vector<Vertex> vertices;
 	std::vector<GLuint> indices;
 
 	for (int z = 0; z <= res; ++z) {
 		for (int x = 0; x <= res; ++x) {
-			float xf = (float)x / res;
-			float zf = (float)z / res;
-			vertices.emplace_back(
-				(xf - 0.5f) * size,   // X
-				0.0f,                 // Y
-				(zf - 0.5f) * size    // Z
-			);
+			float xf = static_cast<float>(x) / res;
+			float zf = static_cast<float>(z) / res;
+			Vertex v;
+			v.position = glm::vec3((xf - 0.5f) * size, 0.0f, (zf - 0.5f) * size);
+			v.uv = glm::vec2(xf, zf);
+			vertices.push_back(v);
 		}
 	}
 
@@ -47,13 +46,17 @@ void Platform::GenerateMesh(float size, int res) {
 
 	glBindVertexArray(vao);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), vertices.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), indices.data(), GL_STATIC_DRAW);
 
+	// Position attribute
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, position));
+	// UV attribute
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, uv));
 
 	glBindVertexArray(0);
 }
