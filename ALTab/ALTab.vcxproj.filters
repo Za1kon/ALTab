@@ -42,10 +42,19 @@
     <ClCompile Include="src\Wall.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="src\AimWall.cpp">
+    <ClCompile Include="src\AimWallConfig.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
-    <ClCompile Include="src\Options.cpp">
+    <ClCompile Include="src\AimWallManager.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ConfigWall.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ShaderProgram.cpp">
+      <Filter>Archivos de origen</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Target.cpp">
       <Filter>Archivos de origen</Filter>
     </ClCompile>
   </ItemGroup>
@@ -77,10 +86,19 @@
     <ClInclude Include="src\Wall.hpp">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="src\AimWall.hpp">
+    <ClInclude Include="src\AimWallConfig.hpp">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
-    <ClInclude Include="src\Options.hpp">
+    <ClInclude Include="src\AimWallManager.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ConfigWall.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ShaderProgram.hpp">
+      <Filter>Archivos de encabezado</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Target.hpp">
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>
@@ -116,6 +134,18 @@
       <Filter>Archivos de recursos</Filter>
     </None>
     <None Include="shaders\sharpen.vert">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+    <None Include="shaders\aimtarget.frag">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+    <None Include="shaders\aimtarget.vert">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+    <None Include="shaders\configwall.frag">
+      <Filter>Archivos de recursos</Filter>
+    </None>
+    <None Include="shaders\configwall.vert">
       <Filter>Archivos de recursos</Filter>
     </None>
   </ItemGroup>
